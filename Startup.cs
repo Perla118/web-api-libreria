@@ -1,10 +1,8 @@
 using librerias_PMRI.Data;
-using librerias_PMRI.Data.Models.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,6 +12,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.SqlServer;
+using Microsoft.EntityFrameworkCore;
+using librerias_PMRI.Data.Models;
+using librerias_PMRI.Data.Models.Services;
+using librerias_PMRI.Data.Services;
 
 namespace librerias_PMRI
 {
@@ -23,7 +26,7 @@ namespace librerias_PMRI
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            ConnectionString = Configuration.GetConnectionString("DefaultConnectionString");
+            ConnectionString = configuration.GetConnectionString("DefaultConnectionString");
         }
 
         public IConfiguration Configuration { get; }
@@ -33,12 +36,13 @@ namespace librerias_PMRI
         {
 
             services.AddControllers();
-            //Configurar DBcontext con SQL
+            //Configurar DbContext con SQL
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(ConnectionString));
-
-
-            //Configurar el servicio para que pueda ser usado
+            //Configurar para ser usado 
             services.AddTransient<BooksService>();
+            services.AddTransient<AuthorsService>();
+            services.AddTransient<PublisherService>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "librerias_PMRI", Version = "v1" });
@@ -65,7 +69,7 @@ namespace librerias_PMRI
             {
                 endpoints.MapControllers();
             });
-            AppDbInitializer.Seed(app);
+            //AppDbInitialer.Seed(app); 
         }
     }
 }
